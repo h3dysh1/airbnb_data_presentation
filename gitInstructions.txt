@@ -1,0 +1,12 @@
+To create a change:
+1. First make the changes to the files
+2. in terminal write: git add .
+3. in terminal write: git commit -m "{Message}"
+4. in terminal write: git push
+
+
+TO update:
+write: git pull
+
+
+
