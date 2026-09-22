@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import json
 from itertools import combinations
 from sklearn.preprocessing import KBinsDiscretizer
 from scipy.stats import pearsonr, spearmanr
@@ -46,6 +47,7 @@ def discretize(series, n_bins=4):
     return kbd.fit_transform(x).ravel()
 
 def compute_correlations():
+    results = []
     for v1, v2 in combinations(variables, 2):
     # Pearson correlation
         pearson_corr, _ = pearsonr(df[v1], df[v2])
@@ -67,6 +69,20 @@ def compute_correlations():
         print(f"  Spearman: {spearman_corr:.4f}")
         print(f"  Mutual Information: {mi:.4f}")
         print(f"  Normalized Mutual Information: {nmi:.4f}\n")
+
+        results.append({
+            "var_1": v1,
+            "var_2": v2,
+            "pearson": round(pearson_corr, 4),
+            "spearman": round(spearman_corr, 4),
+            "mutual_information": round(mi, 4),
+            "normalized_mutual_information": round(nmi, 4),
+        })
+
+    with open("correlation_results.json", "w") as f:
+        json.dump(results, f, indent=2)
+
+    print("Saved results to correlation_results.json")
 
 
 compute_correlations()
