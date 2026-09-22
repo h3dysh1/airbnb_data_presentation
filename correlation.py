@@ -11,9 +11,13 @@ REFERENCE_DATE = pd.Timestamp("2026-07-07")  # set this to your dataset's scrape
 df = pd.read_csv(DATA_PATH)
 df['price'] = df['price'].replace('[\$,]', '', regex=True).astype(float)
 
-variables = ['review_scores_rating', 'price', 'amenities_count', 'host_listings_count', 'days_since_last_review']
+variables = {"review_scores_rating": ("review_scores_rating", "numeric"),
+    "price": ("price", "numeric"),
+    "amenity_count": ("amenity_count", "numeric"),
+    "host_listings_count": ("host_listings_count", "numeric"),
+    "review_frequency": ("review_frequency", "ordinal")}
 
-df = df.dropna(subset=variables)
+df = df.dropna(subset=list(variables.keys()))
 def compute_correlations():
     for v1, v2 in combinations(variables, 2):
     # Pearson correlation
