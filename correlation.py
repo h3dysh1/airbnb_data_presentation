@@ -37,6 +37,13 @@ variables = {"review_scores_rating": ("review_scores_rating", "numeric"),
 
 df = df.dropna(subset=list(variables.keys()))
 
+# Discretise numeric variables for MI/NMI calculations, and leaving the ordinal varaibles unchanged
+def discretize(series, n_bins=4):
+    x = series.to_numpy(dtype=float).reshape(-1, 1)
+    if len(np.unique(x)) <= n_bins:
+        return x.ravel()
+    kbd = KBinsDiscretizer(n_bins=n_bins, encode="ordinal", strategy="quantile")
+    return kbd.fit_transform(x).ravel()
 
 def compute_correlations():
     for v1, v2 in combinations(variables, 2):
@@ -47,10 +54,13 @@ def compute_correlations():
         spearman_corr, _ = spearmanr(df[v1], df[v2])
             
             # Mutual Information
-        mi = mutual_info_score(df[v1], df[v2])
+        # mi = mutual_info_score(df[v1], df[v2])
+        x_disc, y_disc = discretize(df[v1]), discretize(df[v2])
+        mi = mutual_info_score(x_disc, y_disc)
+
             
             # Normalized Mutual Information
-        nmi = normalized_mutual_info_score(df[v1], df[v2])
+        nmi = normalized_mutual_info_score(x_disc, y_disc)
             
         print(f"Correlation between {v1} and {v2}")
         print(f"  Pearson: {pearson_corr:.4f}")
