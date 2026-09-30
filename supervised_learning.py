@@ -140,30 +140,30 @@ def knn(X_train, X_test, y_train, y_test):
     n = 5
     nf_CV = KFold(n_splits=n, shuffle=True, random_state=42)
 
-    best_k = None
+    best_k = 0
     best_score = -1
 
     for k in k_values:
-        fold_scores = []
+        results = []
 
         for train_idx, test_idx in nf_CV.split(X_train):
             X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[test_idx]
             y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[test_idx]
 
-            model = KNeighborsClassifier(n_neighbors=k)
-            model.fit(X_tr, y_tr)
+            knn = KNeighborsClassifier(n_neighbors=k)
+            knn.fit(X_tr, y_tr)
 
-            y_pred = model.predict(X_val)
-            fold_scores.append(accuracy_score(y_val, y_pred))
+            y_pred = knn.predict(X_val)
+            results.append(accuracy_score(y_val, y_pred))
 
-        mean_score = np.mean(fold_scores)
+        mean_score = np.mean(results)
         print(f"k={k}: mean accuracy = {mean_score:.4f}")
 
         if mean_score > best_score:
             best_score = mean_score
             best_k = k
 
-    print(f"\nBest k: {best_k}, score: {best_score:.4f}")
+    print(f"\nBest k: {best_k}, score: {best_score}")
 
     best_knn = KNeighborsClassifier(n_neighbors=best_k)
     best_knn.fit(X_train, y_train)
@@ -177,23 +177,23 @@ def decision_tree(X_train, X_test, y_train, y_test):
     n = 5
     nf_CV = KFold(n_splits=n, shuffle=True, random_state=42)
 
-    best_depth = None
+    best_depth = 0
     best_score = -1
 
     for depth in depth_values:
-        fold_scores = []
+        results = []
 
         for train_idx, test_idx in nf_CV.split(X_train):
             X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[test_idx]
             y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[test_idx]
 
-            model = DecisionTreeClassifier(max_depth=depth, random_state=42)
-            model.fit(X_tr, y_tr)
+            dt = DecisionTreeClassifier(max_depth=depth, random_state=42)
+            dt.fit(X_tr, y_tr)
 
-            y_pred = model.predict(X_val)
-            fold_scores.append(accuracy_score(y_val, y_pred))
+            y_pred = dt.predict(X_val)
+            results.append(accuracy_score(y_val, y_pred))
 
-        mean_score = np.mean(fold_scores)
+        mean_score = np.mean(results)
         print(f"max_depth={depth}: mean accuracy = {mean_score:.4f}")
 
         if mean_score > best_score:
