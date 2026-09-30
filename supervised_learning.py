@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split, KFold
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.dummy import DummyClassifier
 import re
  
 DATA_PATH = 'processed_data.csv'
@@ -43,16 +44,29 @@ def main():
         X, y,
         test_size=TEST_SPLIT,
         stratify=y,
+        random_state=42
     )
 
     # Fill out the missings values (impute), scale the values
     X_train, X_test = impute_and_scale(X_train, X_test)
 
     #KNN
-    knn(X_train, X_test, y_train, y_test)
+    knn = run_knn(X_train, X_test, y_train, y_test)
 
     # DEcision Tree
-    decision_tree(X_train, X_test, y_train, y_test)
+    dt = run_decision_tree(X_train, X_test, y_train, y_test)
+    feature_importance(dt, X_train.columns)
+
+    # Baseline
+    baseline_score = baseline(X_train, X_test, y_train, y_test)
+
+    knn_test_score = accuracy_score(y_test, knn.predict(X_test))
+    dt_test_score = accuracy_score(y_test, dt.predict(X_test))
+
+    print(f"\nKNN test accuracy: {knn_test_score} (baseline: {baseline_score}")
+    print(f"Decision Tree test accuracy: {dt_test_score} (baseline: {baseline_score}")
+
+    bootstrap_ci(knn, X_test, y_test)
 
 
 def process_df(df):
@@ -135,18 +149,17 @@ def impute_and_scale(X_train, X_test):
 
 
 
-def knn(X_train, X_test, y_train, y_test):
-    k_values = range(1, 50, 1)
-    n = 5
-    nf_CV = KFold(n_splits=n, shuffle=True, random_state=42)
+def run_knn(X_train, X_test, y_train, y_test):
+    k_values = range(1, 200, 5)
+    five_f_CV = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
     best_k = 0
     best_score = -1
 
-    for k in k_values:
+    for k in k_values:  
         results = []
 
-        for train_idx, test_idx in nf_CV.split(X_train):
+        for train_idx, test_idx in five_f_CV.split(X_train, y_train):
             X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[test_idx]
             y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[test_idx]
 
@@ -172,10 +185,10 @@ def knn(X_train, X_test, y_train, y_test):
 
 
 
-def decision_tree(X_train, X_test, y_train, y_test):
-    depth_values = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, None]
+def run_decision_tree(X_train, X_test, y_train, y_test):
+    depth_values = range(1, 20)
     n = 5
-    nf_CV = KFold(n_splits=n, shuffle=True, random_state=42)
+    nf_CV = StratifiedKFold(n_splits=n, shuffle=True, random_state=42)
 
     best_depth = 0
     best_score = -1
@@ -183,7 +196,7 @@ def decision_tree(X_train, X_test, y_train, y_test):
     for depth in depth_values:
         results = []
 
-        for train_idx, test_idx in nf_CV.split(X_train):
+        for train_idx, test_idx in nf_CV.split(X_train, y_train):
             X_tr, X_val = X_train.iloc[train_idx], X_train.iloc[test_idx]
             y_tr, y_val = y_train.iloc[train_idx], y_train.iloc[test_idx]
 
@@ -207,6 +220,52 @@ def decision_tree(X_train, X_test, y_train, y_test):
 
     return best_dt
 
+
+
+# The code below has been AI slopped ill write it myself soon tm
+
+def baseline(X_train, X_test, y_train, y_test):
+    dummy = DummyClassifier(strategy='most_frequent')
+    dummy.fit(X_train, y_train)
+
+    y_pred = dummy.predict(X_test)
+    score = accuracy_score(y_test, y_pred)
+
+    print(f"Baseline (majority class) accuracy: {score:.4f}")
+
+    return score
+
+
+def bootstrap_ci(model, X_test, y_test, n_iterations=10):
+    scores = []
+    n = len(X_test)
+
+    for i in range(n_iterations):
+        idx = np.random.choice(n, size=n, replace=True)
+        X_sample = X_test.iloc[idx]
+        y_sample = y_test.iloc[idx]
+
+        y_pred = model.predict(X_sample)
+        scores.append(accuracy_score(y_sample, y_pred))
+
+    scores = np.array(scores)
+    lower = np.percentile(scores, 2.5)
+    upper = np.percentile(scores, 97.5)
+
+    print(f"Bootstrap 95% CI: [{lower:.4f}, {upper:.4f}] (mean={scores.mean():.4f})")
+
+    return lower, upper
+
+
+
+def feature_importance(model, feature_names):
+    importances = pd.Series(model.feature_importances_, index=feature_names)
+    importances = importances.sort_values(ascending=False)
+
+    print("\nFeature importances (Decision Tree):")
+    print(importances)
+
+    return importances
 
 
 main()
