@@ -68,6 +68,8 @@ def main():
 
     bootstrap_ci(knn, X_test, y_test)
 
+    save_predictions(X_test, y_test, {'knn': knn, 'decision_tree': dt})
+
 
 def process_df(df):
     df = df.copy()
@@ -222,7 +224,7 @@ def run_decision_tree(X_train, X_test, y_train, y_test):
 
 
 
-# The code below has been AI slopped ill write it myself soon tm
+# All code below has been AI slopped ill write it myself soonish
 
 def baseline(X_train, X_test, y_train, y_test):
     dummy = DummyClassifier(strategy='most_frequent')
@@ -266,6 +268,19 @@ def feature_importance(model, feature_names):
     print(importances)
 
     return importances
+
+
+def save_predictions(X_test, y_test, models: dict, path='predictions.csv'):
+    output = pd.DataFrame(index=X_test.index)
+    output['actual'] = y_test
+
+    for name, model in models.items():
+        output[f'predicted_{name}'] = model.predict(X_test)
+
+    output.to_csv(path, index=True)
+    print(f"\nSaved predictions to {path}")
+
+    return output
 
 
 main()
