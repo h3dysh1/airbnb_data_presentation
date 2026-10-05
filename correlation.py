@@ -4,7 +4,7 @@ import json
 from itertools import combinations
 from sklearn.preprocessing import KBinsDiscretizer
 from scipy.stats import pearsonr, spearmanr
-from sklearn.metrics import mutual_info_score, normalized_mutual_info_score
+from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
 
 DATA_PATH = "processed_data.csv"   # output of preprocessing_2.py, NOT processed_only.csv
 REFERENCE_DATE = pd.Timestamp("2026-07-07")  # set this to your dataset's scrape date
@@ -15,7 +15,7 @@ AMENITY_INDICATORS = [
 REVIEW_FREQ_ORDER = ["No Reviews", "Low", "Medium", "High"]
 
 df = pd.read_csv(DATA_PATH)
-df['price'] = df['price'].replace('[\$,]', '', regex=True).astype(float)
+df['price'] = df['price'].replace(r'[\$,]', '', regex=True).astype(float)
 
 
 
@@ -38,6 +38,17 @@ variables = {"review_scores_rating": ("review_scores_rating", "numeric"),
 
 df = df.dropna(subset=list(variables.keys()))
 
+def mutual_information(x, y, type_x, type_y):
+    x = np.asarray(x, dtype=float).reshape(-1, 1)
+    y = np.asarray(y, dtype=float)
+
+    if type_y == "ordinal":
+        return mutual_info_classif(x, y.astype(int), discrete_features=False, random_state=42)[0]
+    if type_x == "ordinal":
+        return mutual_info_classif(y.reshape(-1, 1), x.ravel().astype(int),
+                                   discrete_features=False, random_state=42)[0]
+    return mutual_info_regression(x, y, discrete_features=False, random_state=42)[0]
+
 def compute_correlations():
     results = []
     for v1, v2 in combinations(variables, 2):
@@ -47,26 +58,22 @@ def compute_correlations():
         # Spearman correlation
         spearman_corr, _ = spearmanr(df[v1], df[v2])
             
-        # Mutual Information
-        mi = mutual_info_score(df[v1], df[v2])
-            
-        # Normalized Mutual Information
-        nmi = normalized_mutual_info_score(df[v1], df[v2])
+        # Mutual information (no discretising)
+        mi = mutual_information(df[v1], df[v2], variables[v1][1], variables[v2][1])
             
        
         print(f"Correlation between {v1} and {v2}")
         print(f"  Pearson: {pearson_corr:.4f}")
         print(f"  Spearman: {spearman_corr:.4f}")
-        print(f"  Mutual Information: {mi:.4f}")
-        print(f"  Normalized Mutual Information: {nmi:.4f}\n")
+        print(f"  Mutual Information: {mi:.4f}\n")
+  
 
         results.append({
             "var_1": v1,
             "var_2": v2,
             "pearson": round(pearson_corr, 4),
             "spearman": round(spearman_corr, 4),
-            "mutual_information": round(mi, 4),
-            "normalized_mutual_information": round(nmi, 4),
+            "mutual_information": round(float(mi), 4),
         })
 
     with open("correlation_results.json", "w") as f:
