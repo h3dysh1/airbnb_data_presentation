@@ -221,6 +221,7 @@ def compare_ratings_by_cluster(df):
     plt.title("Mean Review Score by K-Means Cluster")
 
 # Fit hierarchical (Ward) clustering with k clusters and attach the labels
+# Adds the resulting cluster assignments to the Airbnb dataframe so they can be compared with the K-means solution
 def final_hierarchical(df, X, k):
     df = df.copy()
 
