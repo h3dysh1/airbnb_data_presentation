@@ -64,7 +64,7 @@ DATA_PATH = "processed_data.csv"
 
 # Functions ----------------------------------------------------------------
 
-# Preparing data - might need to add to preprocessing ?
+# Preparing data
 def prepare_data(raw_data):
     df = raw_data.copy()
  
@@ -90,6 +90,8 @@ def prepare_data(raw_data):
     return df
 
 # Comparing summary statistics and missing values of each candidate set
+# in order to figure out which candidate feature set we want to use
+# Features sets with excessive missing values or unsuitable variables are excluded
 def compare_candidate_feature_sets(df):
     df = df.copy()
 
@@ -110,7 +112,7 @@ def compare_candidate_feature_sets(df):
         
         print()
 
-# Creating the feature set, returns cluster_df and X_scaled for k_means
+# Creating the chosen feature set, returns cluster_df and X_scaled for k_means
 def feature_set(df, features):
     df = df.copy()
 
@@ -118,17 +120,18 @@ def feature_set(df, features):
     cluster_df = df[features + ["review_scores_rating"]].copy() 
     cluster_df = cluster_df.dropna(subset=features).copy()
 
-    # Distributions
+    # Visualising distributions for each feature
     print(cluster_df[features].describe())
 
-    # Histograms
+    # Visualising histograms for each feature
     cluster_df[features].hist(
         figsize=(12, 8),
         bins=30
     )
     plt.tight_layout()
 
-    # Standardise
+    # Standardising data
+    # Creates a comparable scale since k_means uses distance
     X = cluster_df[features]
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
@@ -157,11 +160,14 @@ def k_means(X):
             random_state=42,
             n_init=10
         )
-        
+
+        # Performs clustering - fits model into k clusters
         kmeans.fit(X)
         
         inertias.append(kmeans.inertia_)
 
+    # Plot results - inertia for each value of k
+    # Use this figure to find the elbow, define as variable K 
     plt.figure(figsize=(8, 5))
     plt.plot(
         k_values,
@@ -174,7 +180,7 @@ def k_means(X):
     plt.title("Elbow Method for K-Means")
     plt.xticks(list(k_values))
 
-# Fit the final k-means model with the chosen k and return a copy of the
+# Fit the final k-means model with the chosen K and return a copy of the
 # data frame with each row's cluster label in a new kmeans_cluster column
 # K is chosen from elbow method and defined above
 def final_kmeans(df, X, k):
@@ -190,7 +196,7 @@ def final_kmeans(df, X, k):
 
     return df
 
-# Compares review ratings by cluster
+# Compares review ratings by cluster to investigate relationship
 # Visualises differences using a bar graph
 # Might wanna fix this (heavily right skewed data)
 # Use our low/med/high categories instead somehow?
