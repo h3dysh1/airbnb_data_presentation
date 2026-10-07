@@ -4,69 +4,79 @@
     "var_2": "price",
     "pearson": 0.0292,
     "spearman": 0.0921,
-    "mutual_information": 0.0218
+    "mutual_information": 0.0218,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "review_scores_rating",
     "var_2": "amenity_count",
     "pearson": 0.0792,
     "spearman": 0.0212,
-    "mutual_information": 0.017
+    "mutual_information": 0.017,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "review_scores_rating",
     "var_2": "host_listings_count",
     "pearson": -0.2168,
     "spearman": -0.2783,
-    "mutual_information": 0.1276
+    "mutual_information": 0.1276,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "review_scores_rating",
     "var_2": "review_frequency",
     "pearson": 0.2052,
     "spearman": -0.0937,
-    "mutual_information": 0.3589
+    "mutual_information": 0.3589,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "price",
     "var_2": "amenity_count",
     "pearson": 0.0339,
     "spearman": 0.2511,
-    "mutual_information": 0.0637
+    "mutual_information": 0.0637,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "price",
     "var_2": "host_listings_count",
     "pearson": -0.016,
     "spearman": 0.0574,
-    "mutual_information": 0.3016
+    "mutual_information": 0.3016,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "price",
     "var_2": "review_frequency",
     "pearson": -0.0119,
     "spearman": 0.0153,
-    "mutual_information": 0.0366
+    "mutual_information": 0.0366,
+    "normalized_mutual_information": null
   },
   {
     "var_1": "amenity_count",
     "var_2": "host_listings_count",
     "pearson": 0.0482,
     "spearman": 0.0484,
-    "mutual_information": 0.0732
+    "mutual_information": 0.0732,
+    "normalized_mutual_information": 0.0324
   },
   {
     "var_1": "amenity_count",
     "var_2": "review_frequency",
     "pearson": 0.0864,
     "spearman": 0.0659,
-    "mutual_information": 0.0
+    "mutual_information": 0.0,
+    "normalized_mutual_information": 0.0061
   },
   {
     "var_1": "host_listings_count",
     "var_2": "review_frequency",
     "pearson": -0.0958,
     "spearman": -0.0449,
-    "mutual_information": 0.0512
+    "mutual_information": 0.0512,
+    "normalized_mutual_information": 0.029
   }
 ]
