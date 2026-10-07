@@ -27,7 +27,7 @@ BINARY_AMENITY = ['has_wifi', 'has_kitchen', 'has_air_conditioning', 'has_washer
                   'has_heating', 'has_parking', 'has_self_check-in']
 # sets real order of the review-frequency catetgories
 REVIEW_FREQ_ORDER = ["No Reviews", "Low", "Medium", "High"]
-# categorical columns that are missing
+#  rows that are missing are removed
 FILTER_CATEGORIES = ['Missing']
 # how many features print
 TOP_N = 3
