@@ -125,7 +125,7 @@ def main():
     importances.rename("tree_importance").round(5).to_csv("decision_tree_importances.csv")
     print("\nSaved decision_tree_importances.csv")
 
-      # --- Filter method: Mutual Information ---
+      # Filter method: Mutual Information
     discrete_mask = [col in (BOOL + BINARY_AMENITY + ['review_frequency']) for col in X_COLS]
 
     mi_arr = mutual_info_classif(X_train, y_train, discrete_features=discrete_mask, random_state=SEED)
