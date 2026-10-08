@@ -126,8 +126,10 @@ def main():
     print("\nSaved decision_tree_importances.csv")
 
       # Filter method: Mutual Information
+    #Seperates the discrete and continuous features for mutual information calculation
     discrete_mask = [col in (BOOL + BINARY_AMENITY + ['review_frequency']) for col in X_COLS]
 
+     # Calculates the mutual information scores for each feature and prints the top 3 features based on mutual information and decision tree importance
     mi_arr = mutual_info_classif(X_train, y_train, discrete_features=discrete_mask, random_state=SEED)
     mi_scores = pd.Series(mi_arr, index=X_train.columns)
 
